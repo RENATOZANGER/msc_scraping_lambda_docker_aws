@@ -18,7 +18,15 @@ resource "aws_iam_role" "lambda_role" {
 
 data "aws_iam_policy_document" "ecr_policy" {
   statement {
-    actions   = ["ecr:GetAuthorizationToken", "ecr:BatchCheckLayerAvailability", "ecr:GetDownloadUrlForLayer", "ecr:BatchGetImage"]
+    actions   = [
+      "ecr:GetAuthorizationToken", 
+      "ecr:BatchCheckLayerAvailability", 
+      "ecr:GetDownloadUrlForLayer", 
+      "ecr:BatchGetImage",
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ] 
     resources = ["*"]
   }
 }
