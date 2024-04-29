@@ -1,5 +1,5 @@
 resource "aws_iam_role" "lambda_role" {
-  name = "lambda_role"
+  name = var.role_name
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -24,7 +24,6 @@ data "aws_iam_policy_document" "ecr_policy" {
 }
 
 resource "aws_iam_policy" "ecr_access_policy" {
-  count  = length(data.aws_iam_policy.this) > 0 ? 0 : 1
   name   = var.policy_name
   policy = data.aws_iam_policy_document.ecr_policy.json
 }

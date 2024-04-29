@@ -15,3 +15,9 @@ variable "policy_name" {
   type        = string
   default     = "ECRAccessPolicy"
 }
+
+variable "role_name" {
+  description = "role name"
+  type        = string
+  default     = "lambda_role"
+}
