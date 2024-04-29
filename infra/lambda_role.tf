@@ -24,8 +24,8 @@ data "aws_iam_policy_document" "ecr_policy" {
 }
 
 resource "aws_iam_policy" "ecr_access_policy" {
-  count  = length(data.aws_iam_policy.existing_ecr_policy.arn) > 0 ? 0 : 1
-  name   = "ECRAccessPolicy"
+  count  = length(data.aws_iam_policy.this) > 0 ? 0 : 1
+  name   = var.policy_name
   policy = data.aws_iam_policy_document.ecr_policy.json
 }
 

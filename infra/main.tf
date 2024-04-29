@@ -13,17 +13,9 @@ terraform {
 
 resource "aws_lambda_function" "my_lambda" {
   count         = length(data.aws_lambda_function.this) > 0 ? 0 : 1
-  function_name = "Scraping-MSC"
+  function_name = var.lambda_name
   package_type  = "Image"
   image_uri     = "686148334870.dkr.ecr.us-east-1.amazonaws.com/lambda_scraping:latest"
   role          = aws_iam_role.lambda_role.arn
   timeout       = 90
-}
-
-data "aws_lambda_function" "this" {
-  function_name = "Scraping-MSC"
-}
-
-output "lambda_arn" {
-  value = data.aws_lambda_function.this.arn
 }
