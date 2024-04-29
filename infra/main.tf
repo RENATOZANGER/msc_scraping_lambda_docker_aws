@@ -17,9 +17,13 @@ resource "aws_lambda_function" "my_lambda" {
   package_type  = "Image"
   image_uri     = "686148334870.dkr.ecr.us-east-1.amazonaws.com/lambda_scraping:latest"
   role          = aws_iam_role.lambda_role.arn
-  timeout       = 90 
+  timeout       = 90
 }
 
 data "aws_lambda_function" "this" {
-  function_name = aws_lambda_function.my_lambda.arn
+  function_name = "Scraping-MSC"
+}
+
+output "lambda_arn" {
+  value = data.aws_lambda_function.this.arn
 }
