@@ -1,5 +1,14 @@
 provider "aws" {
-  region = "us-east-1"
+  region = var.region
+}
+
+terraform {
+  backend "s3" {
+    bucket         = "statefile-terraform"
+    key            = "path/terraform.tfstate"
+    region         = var.region
+    encrypt        = false
+  }
 }
 
 resource "aws_lambda_function" "my_lambda" {
