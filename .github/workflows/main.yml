@@ -3,7 +3,7 @@ name: Deploy Infrastructure with Terraform
 on:
   push:
     branches:
-      - main  # Define em quais branches os comandos serão executados
+      - main 
   pull_request:
     branches:
       - main
