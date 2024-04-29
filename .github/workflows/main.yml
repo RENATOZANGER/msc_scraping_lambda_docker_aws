@@ -15,8 +15,10 @@ jobs:
         terraform_version: "1.0.0"
     - name: Terraform Init
       run: terraform init
+      working-directory: ./project/infra
     - name: Terraform Apply
       run: terraform apply -auto-approve
+      working-directory: ./project/infra
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
