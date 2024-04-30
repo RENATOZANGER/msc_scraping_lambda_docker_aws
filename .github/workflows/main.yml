@@ -40,7 +40,7 @@ jobs:
         fi
 
     - name: Create ECR Repository if not exists
-      if: steps.check-ecr-repository.outputs.repository_exists == ''
+      if: steps.check-ecr-repository.outputs.repository_exists == false
       run: |
         aws ecr create-repository --repository-name ${{ env.Name_Repo }} --image-scanning-configuration scanOnPush=true --region ${{ env.Region }}
     
