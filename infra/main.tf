@@ -4,9 +4,9 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket = var.bucket_name
+    bucket = "lambda-scraping-remote-state"
     key = "lambda-scraping/terraform.tfstate"
-    region = var.region
+    region = "us-east-1"
   }
 }
 
