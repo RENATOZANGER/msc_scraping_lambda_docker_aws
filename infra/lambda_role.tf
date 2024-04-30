@@ -19,18 +19,35 @@ resource "aws_iam_role" "lambda_role" {
 data "aws_iam_policy_document" "ecr_policy" {
   statement {
     actions   = [
-      "ecr:GetAuthorizationToken", 
-      "ecr:BatchCheckLayerAvailability", 
-      "ecr:GetDownloadUrlForLayer", 
-      "ecr:BatchGetImage",
+      "ecr:GetAuthorizationToken",
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
-      "logs:PutLogEvents",
-      "sns:Publish"
+      "logs:PutLogEvents"
     ] 
     resources = ["*"]
   }
+
+  statement {
+    actions   = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage"
+    ]
+    resources = [
+      "arn:aws:ecr:${var.region}:${data.aws_caller_identity.current.account_id}:repository/${var.repo_name}"
+    ]
+  }
+
+  statement {
+    actions   = [
+      "sns:Publish"
+    ]
+    resources = [
+      "arn:aws:sns:${var.region}:${data.aws_caller_identity.current.account_id}:send-email-msc"
+    ]
+  }
 }
+
 
 resource "aws_iam_policy" "ecr_access_policy" {
   name   = var.policy_name

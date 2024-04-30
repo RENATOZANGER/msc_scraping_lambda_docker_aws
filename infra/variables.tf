@@ -27,3 +27,9 @@ variable "bucket_name" {
   type        = string
   default     = "lambda-scraping-remote-state"
 }
+
+variable "repo_name" {
+  description = "repo name"
+  type        = string
+  default     = "lambda_scraping"
+}
