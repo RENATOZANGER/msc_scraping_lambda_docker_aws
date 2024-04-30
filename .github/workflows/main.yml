@@ -32,7 +32,11 @@ jobs:
     - name: Check if ECR repository exists
       id: check-ecr-repository
       run: |
-        aws ecr describe-repositories --repository-names ${{ env.Name_Repo }} 
+        if aws ecr describe-repositories --repository-names ${{ env.REPO_NAME }} >/dev/null 2>&1; then
+          echo "::set-output name=repository_exists::true"
+        else
+          echo "::set-output name=repository_exists::false"
+        fi
 
     - name: Create ECR Repository if not exists
       if: steps.check-ecr-repository.outputs.repository_exists == false
