@@ -14,11 +14,14 @@ class MscScraping:
     
     def run(self):
         try:
-            self.logging.info("Exec scraping..", extra={"Function Name": "run"})
+            self.logging.info("Start function", extra={"Function Name": "run"})
             options = get_chrome_options()
             driver = self.chrome_driver.get_driver(options)
+            self.logging.info("Get driver")
             scraping_service = ScrapingService(driver)
+            self.logging.info("Scraping MSC")
             results = scraping_service.scrape_website()
+            self.logging.info("Get results")
             target_value = [results[result] for result in results if (float(result) < 5.800)]
             self.logging.info(target_value)
             if target_value:
