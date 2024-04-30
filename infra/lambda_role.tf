@@ -46,6 +46,15 @@ data "aws_iam_policy_document" "ecr_policy" {
       "arn:aws:sns:${var.region}:${data.aws_caller_identity.current.account_id}:send-email-msc"
     ]
   }
+
+    statement {
+    actions   = [
+      "lambda:InvokeFunction"
+    ]
+    resources = [
+      "arn:aws:lambda:${var.region}:${data.aws_caller_identity.current.account_id}:function:${var.lambda_name}"
+    ]
+  }
 }
 
 
