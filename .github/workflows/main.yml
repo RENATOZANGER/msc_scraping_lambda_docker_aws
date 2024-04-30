@@ -5,6 +5,7 @@ env:
   Region: "us-east-1"
   Name_Lambda: "Scraping-MSC"
   Name_Repo: "lambda_scraping"
+  Name_Bucket: "lambda-scraping-remote-state"
 
 on:
   push:
@@ -43,11 +44,6 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    # env:
-    #   Region: "us-east-1"
-    #   Name_Repo: "lambda_scraping"
-    #   Name_Bucket: "lambda-scraping-remote-state"
-
     steps:
     - name: Set output variable
       id: set_variables
@@ -115,9 +111,6 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    # # env:
-    # #   Region: "us-east-1"
-
     steps:
     - name: Checkout Code
       uses: actions/checkout@v2
@@ -155,10 +148,6 @@ jobs:
   update-lambda:
     needs: deploy
     runs-on: ubuntu-latest
-    # env:
-    #   Region: "us-east-1"
-    #   Name_Lambda: "Scraping-MSC"
-    #   Name_Repo: "lambda_scraping"
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
