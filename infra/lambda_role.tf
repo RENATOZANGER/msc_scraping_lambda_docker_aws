@@ -22,7 +22,8 @@ data "aws_iam_policy_document" "ecr_policy" {
       "ecr:GetAuthorizationToken",
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
-      "logs:PutLogEvents"
+      "logs:PutLogEvents",
+      "Scheduler: CreateSchedule"
     ] 
     resources = ["*"]
   }
