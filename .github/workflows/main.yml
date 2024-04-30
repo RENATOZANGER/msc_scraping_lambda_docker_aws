@@ -9,11 +9,11 @@ on:
       - main
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
+    - name: Checkout repository
       uses: actions/checkout@v2
 
     - name: Configure AWS Credentials
@@ -22,7 +22,6 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
-   
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
@@ -34,6 +33,12 @@ jobs:
     - name: Push Docker image to ECR
       run: |
         docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/lambda_scraping:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
@@ -57,7 +62,7 @@ jobs:
     - name: Rollback on Failure
       if: ${{ steps.deployment_status.outputs.status != 'success' }}
       run: terraform destroy -auto-approve
-      env:
-        TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        TF_VAR_aws_region: us-east-1
+      # env:
+      #   TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #   TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #   TF_VAR_aws_region: us-east-1
