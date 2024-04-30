@@ -34,6 +34,18 @@ jobs:
       run: |
         docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/lambda_scraping:latest
 
+    - name: Get image tags
+      id: ecr-describe-images
+      run: |
+        TAG=$(aws ecr describe-images --repository-name lambda_scraping --query 'sort_by(imageDetails,& imagePushedAt)[-2].imageTags[0]')
+        echo "::set-output name=tag::$TAG"
+    
+    - name: Delete previous image
+      if: steps.ecr-describe-images.outputs.tag != null
+      run: |
+        aws ecr batch-delete-image --repository-name lambda_scraping --image-ids imageTag=$tag
+        
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
