@@ -1,3 +1,4 @@
+import os
 import json
 import logging
 from core.scraping_service import ScrapingService
@@ -22,6 +23,6 @@ class MscScraping:
             self.logging.info(target_value)
             if target_value:
                 message = json.dumps(target_value, indent=4, ensure_ascii=False)
-                self.sns_client.publish_message('ARN_SNS', message)
+                self.sns_client.publish_message(os.environ.get('SNS_TOPIC_ARN'), message)
         except Exception as e:
             self.logging.error(f"Error: {str(e)}")

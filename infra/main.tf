@@ -13,7 +13,12 @@ terraform {
 resource "aws_lambda_function" "my_lambda" {
   function_name = var.lambda_name
   package_type  = "Image"
-  image_uri     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com/${data.external.github_actions_variables.result}:latest"
+  image_uri     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com/lambda_scraping:latest"
   role          = aws_iam_role.lambda_role.arn
   timeout       = 90
+  environment {
+    variables = {
+      SNS_TOPIC_ARN = aws_sns_topic.this.arn
+    }
+  }
 }
