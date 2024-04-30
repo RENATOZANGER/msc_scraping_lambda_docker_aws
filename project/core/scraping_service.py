@@ -19,9 +19,11 @@ class ScrapingService:
         self.logging = logging
     
     def scrape_website(self):
+        self.logging.warning("get driver")
         self.driver.get(
             "https://www.msccruzeiros.com.br/Search%20Result?area=SOA&embkPort=SSZ&departureDateFrom=01%2F01%2F2025"
             "&departureDateTo=31%2F01%2F2025&passengers=2%7C0%7C0%7C0&page=1&nights=6%2C7")
+        self.logging.warning("Start...")
         try:
             self.logging.warning("Start Scraping")
             WebDriverWait(self.driver, 10).until(
