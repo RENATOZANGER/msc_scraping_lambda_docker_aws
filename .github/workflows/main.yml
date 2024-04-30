@@ -32,10 +32,10 @@ jobs:
     - name: Check if ECR repository exists
       id: check-ecr-repository
       run: |
-        if aws ecr describe-repositories --repository-names ${{ env.REPO_NAME }} >/dev/null 2>&1; then
-          echo "::set-output name=repository_exists::false"
-        else
+        if aws ecr describe-repositories --repository-names ${{ env.Name_Repo }} >/dev/null 2>&1; then
           echo "::set-output name=repository_exists::true"
+        else
+          echo "::set-output name=repository_exists::false"
         fi
 
     - name: Create ECR Repository if not exists
@@ -96,7 +96,3 @@ jobs:
     - name: Rollback on Failure
       if: ${{ steps.deployment_status.outputs.status != 'success' }}
       run: terraform destroy -auto-approve
-      # env:
-      #   TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #   TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #   TF_VAR_aws_region: us-east-1
