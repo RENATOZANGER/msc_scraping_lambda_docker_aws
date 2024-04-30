@@ -23,7 +23,8 @@ data "aws_iam_policy_document" "ecr_policy" {
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
       "logs:PutLogEvents",
-      "Scheduler: CreateSchedule"
+      "events:PutRule",
+      "events:PutTargets"
     ] 
     resources = ["*"]
   }
