@@ -19,7 +19,7 @@ jobs:
     steps:
     - name: Set output variable
       id: set_variables
-      run: echo "::set-output name=name_repo::${{ env.NAME_REPO }}"
+      run: echo "NAME_REPO=${{ env.NAME_REPO }}" >> $GITHUB_ENV
     
     - name: Checkout repository
       uses: actions/checkout@v2
