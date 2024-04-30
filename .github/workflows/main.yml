@@ -125,6 +125,7 @@ jobs:
     env:
       Region: "us-east-1"
       Name_Lambda: "Scraping-MSC"
+      Name_Repo: "lambda_scraping"
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
