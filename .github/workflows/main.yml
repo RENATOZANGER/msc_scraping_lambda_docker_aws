@@ -17,8 +17,7 @@ on:
 jobs:
   destroy:
     runs-on: ubuntu-latest
-    #if: contains(github.event.head_commit.message, 'destroy')
-    if: ${{ github.event.head_commit.message }} contains 'destroy'
+    if: contains(github.event.head_commit.message, 'destroy')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -43,7 +42,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    if: ${{ github.event.head_commit.message }} !contains 'destroy'
+    if: !contains(github.event.head_commit.message) 'destroy'
     steps:
     - name: Set output variable
       id: set_variables
