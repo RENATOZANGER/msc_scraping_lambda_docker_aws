@@ -11,6 +11,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      REGION: "us-east-1"
+      NAME_REPO: "lambda_scraping"
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -20,31 +24,39 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
+        aws-region: $REGION
     
     - name: Login to Amazon ECR
-      if: steps.cache.outputs.cache-hit != 'true'  # Skip if credentials were cached
       uses: aws-actions/amazon-ecr-login@v2
 
+    - name: Check if ECR repository exists
+      id: check-ecr-repository
+      run: |
+        repository_exists=$(aws ecr describe-repositories --repository-names $NAME_REPO --output text --query "repositories")
+        echo "::set-output name=repository_exists::$repository_exists"
+
+    - name: Create ECR Repository if not exists
+      if: steps.check-ecr-repository.outputs.repository_exists == ''
+      run: |
+        aws ecr create-repository --repository-name $NAME_REPO --image-scanning-configuration scanOnPush=true --region $REGION
+    
     - name: Build Docker image
       run: |
-        docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/lambda_scraping:latest .
+        docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/NAME_REPO:latest .
 
     - name: Push Docker image to ECR
       run: |
-        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/lambda_scraping:latest
+        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/NAME_REPO:latest
 
     - name: Delete Untagged Images
       run: |
         # delete image without tag
-        repository_name="lambda_scraping"
-        images=$(aws ecr describe-images --repository-name "$repository_name" --query 'imageDetails[?imageTags == `null`].imageDigest' --output text)
+        images=$(aws ecr describe-images --repository-name "$NAME_REPO" --query 'imageDetails[?imageTags == `null`].imageDigest' --output text)
         for image in $images; do
             echo "delete image without tag: $image"
-            aws ecr batch-delete-image --repository-name "$repository_name" --image-ids imageDigest="$image"
+            aws ecr batch-delete-image --repository-name "$NAME_REPO" --image-ids imageDigest="$image"
         done
         
-
   deploy:
     needs: build
     runs-on: ubuntu-latest
