@@ -1,5 +1,11 @@
 name: Deploy Infrastructure with Terraform
 
+env:
+  Destroy: "True"
+  Region: "us-east-1"
+  Name_Lambda: "Scraping-MSC"
+  Name_Repo: "lambda_scraping"
+
 on:
   push:
     branches:
@@ -9,41 +15,38 @@ on:
       - main
 
 jobs:
-  destroy:
-    runs-on: ubuntu-latest
-    env:
-      Region: "us-east-1"
-      Destroy: "True"
-    if: ${{ env.Destroy }} == 'True' 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+  # destroy:
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     Region: "us-east-1"
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v2
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.Region }}
+  #     - name: Configure AWS Credentials
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ${{ env.Region }}
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v1
 
-      - name: Terraform Init
-        run: terraform init
-        working-directory: ./infra
+  #     - name: Terraform Init
+  #       run: terraform init
+  #       working-directory: ./infra
 
-      - name: Terraform Destroy
-        run: terraform destroy -auto-approve
-        working-directory: ./infra
+  #     - name: Terraform Destroy
+  #       run: terraform destroy -auto-approve
+  #       working-directory: ./infra
 
   build:
     runs-on: ubuntu-latest
-    if: github.event.head_commit.message != 'destroy'
-    env:
-      Region: "us-east-1"
-      Name_Repo: "lambda_scraping"
-      Name_Bucket: "lambda-scraping-remote-state"
+    # env:
+    #   Region: "us-east-1"
+    #   Name_Repo: "lambda_scraping"
+    #   Name_Bucket: "lambda-scraping-remote-state"
 
     steps:
     - name: Set output variable
@@ -112,9 +115,8 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    if: github.event.head_commit.message != 'destroy'
-    env:
-      Region: "us-east-1"
+    # # env:
+    # #   Region: "us-east-1"
 
     steps:
     - name: Checkout Code
@@ -153,11 +155,10 @@ jobs:
   update-lambda:
     needs: deploy
     runs-on: ubuntu-latest
-    if: github.event.head_commit.message != 'destroy'
-    env:
-      Region: "us-east-1"
-      Name_Lambda: "Scraping-MSC"
-      Name_Repo: "lambda_scraping"
+    # env:
+    #   Region: "us-east-1"
+    #   Name_Lambda: "Scraping-MSC"
+    #   Name_Repo: "lambda_scraping"
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
