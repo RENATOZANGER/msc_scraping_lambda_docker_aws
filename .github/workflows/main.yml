@@ -37,13 +37,14 @@ jobs:
     - name: Get image tags
       id: ecr-describe-images
       run: |
-        TAG=$(aws ecr describe-images --repository-name lambda_scraping --query 'sort_by(imageDetails,& imagePushedAt)[-2].imageTags[0]')
+        TAG=$(aws ecr describe-images --repository-name lambda_scraping --query 'sort_by(imageDetails,& imagePushedAt)[-2].imageTags[0]' --output text)
         echo "::set-output name=tag::$TAG"
     
     - name: Delete previous image
-      if: steps.ecr-describe-images.outputs.tag != null
+      if: steps.ecr-describe-images.outputs.tag != null && steps.ecr-describe-images.outputs.tag != ''
       run: |
         aws ecr batch-delete-image --repository-name lambda_scraping --image-ids imageTag=$tag
+        
         
 
   deploy:
