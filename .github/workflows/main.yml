@@ -21,8 +21,10 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
+      id: aws-creds-cache
+    
     - name: Login to Amazon ECR
-      id: login-ecr
+      if: steps.cache.outputs.cache-hit != 'true'  # Skip if credentials were cached
       uses: aws-actions/amazon-ecr-login@v2
 
     - name: Build Docker image
@@ -39,6 +41,21 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v2
+
+    - name: Restore AWS Credentials from Cache
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.aws
+        key: ${{ runner.os }}-aws-creds-${{ hashFiles('**/terraform.tf') }}
+      if: success()  # Only restore cache if previous step succeeded
+
+    - name: Configure AWS Credentials
+      if: success()  # Only configure credentials if cache was restored
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ steps.aws-creds-cache.outputs.access_key_id }}
+        aws-secret-access-key: ${{ steps.aws-creds-cache.outputs.secret_access_key }}
+        aws-region: us-east-1
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
