@@ -11,9 +11,9 @@ on:
 jobs:
   destroy:
     runs-on: ubuntu-latest
+    if: github.event.head_commit.message == 'destroy'
     env:
       Region: "us-east-1"
-    if: github.event.head_commit.message == 'destroy'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -38,6 +38,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    if: github.event.head_commit.message != 'destroy'
     env:
       Region: "us-east-1"
       Name_Repo: "lambda_scraping"
@@ -110,6 +111,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    if: github.event.head_commit.message != 'destroy'
     env:
       Region: "us-east-1"
 
@@ -150,6 +152,7 @@ jobs:
   update-lambda:
     needs: deploy
     runs-on: ubuntu-latest
+    if: github.event.head_commit.message != 'destroy'
     env:
       Region: "us-east-1"
       Name_Lambda: "Scraping-MSC"
