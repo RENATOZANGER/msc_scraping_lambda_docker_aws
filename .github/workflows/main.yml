@@ -34,17 +34,15 @@ jobs:
       run: |
         docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/lambda_scraping:latest
 
-    - name: Get image tags
-      id: ecr-describe-images
+    - name: Delete Untagged Images
       run: |
-        TAG=$(aws ecr describe-images --repository-name lambda_scraping --query 'sort_by(imageDetails,& imagePushedAt)[-2].imageTags[0]' --output text)
-        echo "::set-output name=tag::$TAG"
-    
-    - name: Delete previous image
-      if: steps.ecr-describe-images.outputs.tag != null && steps.ecr-describe-images.outputs.tag != ''
-      run: |
-        aws ecr batch-delete-image --repository-name lambda_scraping --image-ids imageTag=$tag
-        
+        # delete image without tag
+        repository_name="lambda_scraping"
+        images=$(aws ecr describe-images --repository-name "$repository_name" --query 'imageDetails[?imageTags == `null`].imageDigest' --output text)
+        for image in $images; do
+            echo "delete image without tag: $image"
+            aws ecr batch-delete-image --repository-name "$repository_name" --image-ids imageDigest="$image"
+        done
         
 
   deploy:
