@@ -11,7 +11,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -35,6 +34,7 @@ jobs:
         docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/lambda_scraping:latest
 
   deploy:
+    needs: build
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Code
