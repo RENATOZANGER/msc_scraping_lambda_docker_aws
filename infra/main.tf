@@ -17,6 +17,7 @@ resource "aws_lambda_function" "my_lambda" {
   image_uri     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com/lambda_scraping:latest"
   role          = aws_iam_role.lambda_role.arn
   timeout       = 90
+  memory_size = 1024
   environment {
     variables = {
       SNS_TOPIC_ARN = aws_sns_topic.this.arn
