@@ -17,6 +17,9 @@ jobs:
       Name_Bucket: "lambda-scraping-remote-state"
 
     steps:
+    - name: Set output variable
+      run: echo "::set-output Name_Repo=Name_Repo::value_from_github_actions"
+    
     - name: Checkout repository
       uses: actions/checkout@v2
 
