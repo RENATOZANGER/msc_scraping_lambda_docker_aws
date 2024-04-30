@@ -21,3 +21,9 @@ variable "role_name" {
   type        = string
   default     = "lambda_role"
 }
+
+variable "bucket_name" {
+  description = "bucket name"
+  type        = string
+  default     = "lambda-scraping-remote-state"
+}
