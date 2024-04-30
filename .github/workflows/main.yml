@@ -1,7 +1,6 @@
 name: Deploy Infrastructure with Terraform
 
 env:
-  Destroy: true
   Region: "us-east-1"
   Name_Lambda: "Scraping-MSC"
   Name_Repo: "lambda_scraping"
@@ -18,7 +17,7 @@ on:
 jobs:
   destroy:
     runs-on: ubuntu-latest
-    if: github.env.Destroy == true
+    if: github.event.head_commit.message == 'destroy'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
