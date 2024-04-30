@@ -2,7 +2,7 @@ resource "aws_scheduler_schedule" "scheduler_lambda" {
     name = "scheduler-Lambda-MSC"
     group_name = "default"
     schedule_expression_timezone = "America/Sao_Paulo"
-    state = "Enable"
+    state = "ENABLED"
     flexible_time_window {
       mode = "OFF"
     }
