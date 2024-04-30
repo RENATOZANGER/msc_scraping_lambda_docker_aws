@@ -19,16 +19,13 @@ class ScrapingService:
         self.logging = logging
     
     def scrape_website(self):
-        self.logging.warning("get driver")
         self.driver.get(
-            "https://www.msccruzeiros.com.br/Search%20Result?area=SOA&embkPort=SSZ&departureDateFrom=01%2F01%2F2025&departureDateTo=31%2F01%2F2025&passengers=2%7C0%7C0%7C0&page=1&nights=6%2C7")
-        self.logging.warning("Start...")
+            "https://www.msccruzeiros.com.br/Search%20Result?area=SOA&embkPort=SSZ&departureDateFrom="
+            "01%2F01%2F2025&departureDateTo=31%2F01%2F2025&passengers=2%7C0%7C0%7C0&page=1&nights=6%2C7")
         try:
-            self.logging.warning("Start Scraping")
             WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.CLASS_NAME, "itinerary-card-detail__destination"))
             )
-            self.logging.warning("waiting find elements")
             destinations = self.driver.find_elements(By.CLASS_NAME, "itinerary-card-detail__destination")
             durations = self.driver.find_elements(By.CLASS_NAME, "itinerary-card-detail__duration")
             ship_names = self.driver.find_elements(By.CLASS_NAME, "itinerary-card-detail__ship-name-and-itinerary")

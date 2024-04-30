@@ -17,7 +17,6 @@ class MscScraping:
             self.logging.info("Start function", extra={"Function Name": "run"})
             options = get_chrome_options()
             driver = self.chrome_driver.get_driver(options)
-            self.logging.info("Get driver")
             scraping_service = ScrapingService(driver)
             self.logging.info("Scraping MSC")
             results = scraping_service.scrape_website()
