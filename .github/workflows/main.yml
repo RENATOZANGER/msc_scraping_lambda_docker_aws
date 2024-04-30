@@ -9,6 +9,33 @@ on:
       - main
 
 jobs:
+  destroy:
+    runs-on: ubuntu-latest
+    env:
+      Region: "us-east-1"
+    if: github.event.head_commit.message == 'destroy'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.Region }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./infra
+
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
+        working-directory: ./infra
+
   build:
     runs-on: ubuntu-latest
     env:
@@ -79,6 +106,7 @@ jobs:
       run: |
         aws s3api create-bucket --bucket ${{ env.Name_Bucket }} --region ${{ env.Region }}
         aws s3api put-bucket-versioning --bucket ${{ env.Name_Bucket }} --versioning-configuration Status=Enabled
+  
   deploy:
     needs: build
     runs-on: ubuntu-latest
