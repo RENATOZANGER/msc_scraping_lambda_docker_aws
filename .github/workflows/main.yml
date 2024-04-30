@@ -124,6 +124,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       Region: "us-east-1"
+      Name_Lambda: "Scraping-MSC"
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -141,5 +142,5 @@ jobs:
       - name: Update Lambda function
         run: |
           aws lambda update-function-code \
-            --function-name my-lambda-function \
+            --function-name ${{ env.Name_Lambda }} \
             --image-uri ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.Region }}.amazonaws.com/${{ env.Name_Repo }}:latest
