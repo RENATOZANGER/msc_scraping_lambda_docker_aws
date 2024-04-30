@@ -14,6 +14,7 @@ jobs:
     env:
       Region: "us-east-1"
       Name_Repo: "lambda_scraping"
+      Name_Bucket: "lambda-scraping-remote-state"
 
     steps:
     - name: Checkout repository
@@ -59,7 +60,21 @@ jobs:
             echo "delete image without tag: $image"
             aws ecr batch-delete-image --repository-name "${{ env.Name_Repo }}" --image-ids imageDigest="$image"
         done
-        
+
+    - name: Check if bucket exists
+      id: check_bucket
+      run: |
+        if aws s3api head-bucket --bucket ${{ env.Name_Bucket }} 2>/dev/null; then
+          echo "::set-output name=bucket_exists::true"
+        else
+          echo "::set-output name=bucket_exists::false"
+        fi
+
+    - name: Create bucket if not exists
+      if: steps.check_bucket.outputs.bucket_exists == 'false'
+      run: |
+        aws s3api create-bucket --bucket ${{ env.Name_Bucket }} --region ${{ env.Region }}
+        aws s3api put-bucket-versioning --bucket ${{ env.Name_Bucket }} --versioning-configuration Status=Enabled
   deploy:
     needs: build
     runs-on: ubuntu-latest
