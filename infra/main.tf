@@ -11,6 +11,7 @@ terraform {
 }
 
 resource "aws_lambda_function" "my_lambda" {
+  depends_on = [ aws_sns_topic_subscription.email_subscription ]
   function_name = var.lambda_name
   package_type  = "Image"
   image_uri     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com/lambda_scraping:latest"
