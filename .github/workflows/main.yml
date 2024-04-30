@@ -33,7 +33,11 @@ jobs:
       id: check-ecr-repository
       run: |
         repository_exists=$(aws ecr describe-repositories --repository-names ${{ env.Name_Repo }} --output text --query "repositories")
-        echo "::set-output name=repository_exists::$repository_exists"
+        if [ $? -eq 0 ]; then
+          echo "::set-output name=repository_exists::$repository_exists"
+        else
+          echo "::set-output name=repository_exists::false"
+        fi
 
     - name: Create ECR Repository if not exists
       if: steps.check-ecr-repository.outputs.repository_exists == ''
