@@ -1,10 +1,12 @@
 name: Deploy Infrastructure with Terraform
 
 env:
-  Region: "us-east-1"
-  Name_Lambda: "Scraping-MSC"
-  Name_Repo: "lambda_scraping"
-  Name_Bucket: "lambda-scraping-remote-state"
+  REGION: "us-east-1"
+  NAME_LAMBDA: "Scraping-MSC"
+  NAME_REPO: "lambda_scraping"
+  NAME_BUCKET: "lambda-scraping-remote-state"
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 on:
   push:
@@ -15,34 +17,32 @@ on:
       - main
 
 jobs:
-  destroy:
-    runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.message, 'destroy')
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+  # destroy:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v2
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.Region }}
+  #     - name: Configure AWS Credentials
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ${{ env.REGION }}
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v1
 
-      - name: Terraform Init
-        run: terraform init
-        working-directory: ./infra
+  #     - name: Terraform Init
+  #       run: terraform init
+  #       working-directory: ./infra
 
-      - name: Terraform Destroy
-        run: terraform destroy -auto-approve
-        working-directory: ./infra
+  #     - name: Terraform Destroy
+  #       run: terraform destroy -auto-approve
+  #       working-directory: ./infra
 
   build:
     runs-on: ubuntu-latest
-    if: !contains(github.event.head_commit.message) 'destroy'
     steps:
     - name: Set output variable
       id: set_variables
@@ -54,9 +54,9 @@ jobs:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.Region }}
+        aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.REGION }}
     
     - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v2
@@ -64,7 +64,7 @@ jobs:
     - name: Check if ECR repository exists
       id: check-ecr-repository
       run: |
-        if aws ecr describe-repositories --repository-names ${{ env.Name_Repo }} >/dev/null 2>&1; then
+        if aws ecr describe-repositories --repository-names ${{ env.NAME_REPO }} >/dev/null 2>&1; then
           echo "::set-output name=repository_exists::true"
         else
           echo "::set-output name=repository_exists::false"
@@ -73,29 +73,29 @@ jobs:
     - name: Create ECR Repository if not exists
       if: steps.check-ecr-repository.outputs.repository_exists == 'false'
       run: |
-        aws ecr create-repository --repository-name ${{ env.Name_Repo }} --image-scanning-configuration scanOnPush=true --region ${{ env.Region }}
+        aws ecr create-repository --repository-name ${{ env.NAME_REPO }} --image-scanning-configuration scanOnPush=true --region ${{ env.REGION }}
     
     - name: Build Docker image
       run: |
-        docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.Region }}.amazonaws.com/${{ env.Name_Repo }}:latest .
+        docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.REGION }}.amazonaws.com/${{ env.NAME_REPO }}:latest .
 
     - name: Push Docker image to ECR
       run: |
-        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.Region }}.amazonaws.com/${{ env.Name_Repo }}:latest
+        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.REGION }}.amazonaws.com/${{ env.NAME_REPO }}:latest
 
     - name: Delete Untagged Images
       run: |
         # delete image without tag
-        images=$(aws ecr describe-images --repository-name "${{ env.Name_Repo }}" --query 'imageDetails[?imageTags == `null`].imageDigest' --output text)
+        images=$(aws ecr describe-images --repository-name "${{ env.NAME_REPO }}" --query 'imageDetails[?imageTags == `null`].imageDigest' --output text)
         for image in $images; do
             echo "delete image without tag: $image"
-            aws ecr batch-delete-image --repository-name "${{ env.Name_Repo }}" --image-ids imageDigest="$image"
+            aws ecr batch-delete-image --repository-name "${{ env.NAME_REPO }}" --image-ids imageDigest="$image"
         done
 
     - name: Check if bucket exists
       id: check_bucket
       run: |
-        if aws s3api head-bucket --bucket ${{ env.Name_Bucket }} 2>/dev/null; then
+        if aws s3api head-bucket --bucket ${{ env.NAME_BUCKET }} 2>/dev/null; then
           echo "::set-output name=bucket_exists::true"
         else
           echo "::set-output name=bucket_exists::false"
@@ -104,8 +104,8 @@ jobs:
     - name: Create bucket if not exists
       if: steps.check_bucket.outputs.bucket_exists == 'false'
       run: |
-        aws s3api create-bucket --bucket ${{ env.Name_Bucket }} --region ${{ env.Region }}
-        aws s3api put-bucket-versioning --bucket ${{ env.Name_Bucket }} --versioning-configuration Status=Enabled
+        aws s3api create-bucket --bucket ${{ env.NAME_BUCKET }} --region ${{ env.REGION }}
+        aws s3api put-bucket-versioning --bucket ${{ env.NAME_BUCKET }} --versioning-configuration Status=Enabled
   
   deploy:
     needs: build
@@ -117,9 +117,9 @@ jobs:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.Region }}
+        aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.REGION }}
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
@@ -154,12 +154,12 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.Region }}
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.REGION }}
 
       - name: Update Lambda function
         run: |
           aws lambda update-function-code \
-            --function-name ${{ env.Name_Lambda }} \
-            --image-uri ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.Region }}.amazonaws.com/${{ env.Name_Repo }}:latest
+            --function-name ${{ env.NAME_LAMBDA }} \
+            --image-uri ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.REGION }}.amazonaws.com/${{ env.NAME_REPO }}:latest
