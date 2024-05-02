@@ -32,6 +32,7 @@ jobs:
           echo destroy: ${{ steps.read_action_js.outputs['destroy'] }}
 
   teste:
+    needs: read-yaml
     runs-on: ubuntu-latest
     steps:
       - name: use-yaml-file
