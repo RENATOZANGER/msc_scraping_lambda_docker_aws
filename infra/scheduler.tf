@@ -7,7 +7,7 @@ resource "aws_scheduler_schedule" "scheduler_lambda" {
     mode = "OFF"
   }
 
-  schedule_expression = "rate(4 minutes)"
+  schedule_expression = "rate(30 minutes)"
 
   target {
     arn      = aws_lambda_function.my_lambda.arn
