@@ -21,7 +21,8 @@ resource "aws_lambda_function" "my_lambda" {
   environment {
     variables = {
       SNS_TOPIC_ARN = aws_sns_topic.this.arn
-      TARGET_VALUE  = 3.200
+      TARGET_VALUE  = 5.200
+      REGION        = var.region
     }
   }
 }

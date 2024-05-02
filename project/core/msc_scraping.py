@@ -4,12 +4,12 @@ import logging
 from core.scraping_service import ScrapingService
 from adapters.chrome_driver import ChromeDriverAdapter, get_chrome_options
 from adapters.sns_client import SNSClientAdapter
-
+from main import REGION, SNS_ARN, TARGET_VALUE
 
 class MscScraping:
     def __init__(self):
         self.chrome_driver = ChromeDriverAdapter("/opt/chromedriver")
-        self.sns_client = SNSClientAdapter("us-east-1")
+        self.sns_client = SNSClientAdapter(REGION)
         self.logging = logging
     
     def run(self):
@@ -20,10 +20,10 @@ class MscScraping:
             self.logging.info("Scraping MSC")
             results = scraping_service.scrape_website()
             self.logging.info("Get results")
-            target_value = [results[result] for result in results if (float(result) < float(os.environ.get('TARGET_VALUE')))]
+            target_value = [results[result] for result in results if (float(result) < TARGET_VALUE)]
             if target_value:
                 message = json.dumps(target_value, indent=4, ensure_ascii=False)
-                self.sns_client.publish_message(os.environ.get('SNS_TOPIC_ARN'), message)
+                self.sns_client.publish_message(SNS_ARN, message)
                 self.logging.info("Email successfully sent")
             else:
                 self.logging.info("Value above expected")
