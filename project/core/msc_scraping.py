@@ -4,7 +4,11 @@ import logging
 from core.scraping_service import ScrapingService
 from adapters.chrome_driver import ChromeDriverAdapter, get_chrome_options
 from adapters.sns_client import SNSClientAdapter
-from main import REGION, SNS_ARN, TARGET_VALUE
+
+REGION = os.environ.get('REGION')
+SNS_ARN = os.environ.get('SNS_TOPIC_ARN')
+TARGET_VALUE = float(os.environ.get('TARGET_VALUE'))
+
 
 class MscScraping:
     def __init__(self):
