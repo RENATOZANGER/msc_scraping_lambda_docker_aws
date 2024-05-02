@@ -7,7 +7,6 @@ env:
   NAME_BUCKET: "lambda-scraping-remote-state"
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  arquivo: 
 
 on:
   push:
@@ -18,16 +17,22 @@ on:
       - main
 
 jobs:
-  exemplo_job:
+  read-yaml:
     runs-on: ubuntu-latest
     steps:
-      - name: Ler o arquivo destroy.yml
-        id: read_arquivo
-        run: |
-          echo "::set-output name=destroy::$(cat destroy.yml | grep destroy | cut -d ' ' -f 2)"
+      - name: checkout
+        uses: actions/checkout@v3
 
-      - name: Exibir valor da variável
-        run: echo "O valor da variável é ${{ steps.read_arquivo.outputs.minha_variavel }}"
+      - name: read-yaml-file
+        uses: pietrobolcato/action-read-yaml@1.0.0
+        id: read_action_js
+        with:
+          config: ${{ github.workspace }}destroy.yaml
+
+      - name: use-yaml-file
+        run: |
+          echo namespace: ${{ steps.read_action_js.outputs['destroy'] }}
+
   # destroy:
   #   runs-on: ubuntu-latest
   #   steps:
