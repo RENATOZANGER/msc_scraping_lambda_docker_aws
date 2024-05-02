@@ -62,7 +62,35 @@ jobs:
       - name: Terraform Destroy
         run: terraform destroy -auto-approve
         working-directory: ./infra
-
+  
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.REGION }}
+      - name: Delete ECR Repository
+        run: |
+          aws ecr delete-repository --repository-name ${{ env.NAME_REPO }} --force --region ${{ env.REGION }}
+      - name: Disable bucket versioning
+        run: |
+          aws s3api put-bucket-versioning --bucket ${{ env.NAME_BUCKET }} --versioning-configuration Status=Suspended --region ${{ env.REGION }}
+      - name: Delete all objects from the bucket
+        run: |
+          aws s3 rm s3://${{ env.NAME_BUCKET }} --recursive --region ${{ env.REGION }}
+      - name: Delete all versions and delete markers
+        run: |
+          aws s3api list-object-versions --bucket ${{ env.NAME_BUCKET }} --output json --query '{Objects: Versions[].{Key:Key,VersionId:VersionId}}' | jq -c '.Objects[]' | while read -r obj; do
+            KEY=$(echo $obj | jq -r .Key);
+            VERSION_ID=$(echo $obj | jq -r .VersionId);
+            aws s3api delete-object --bucket ${{ env.NAME_BUCKET }} --key "$KEY" --version-id "$VERSION_ID";
+          done
+      - name: Delete the bucket
+        run: |
+          aws s3api delete-bucket --bucket ${{ env.NAME_BUCKET }} --region ${{ env.REGION }}
+        
+        
+        
   build:
     runs-on: ubuntu-latest
     needs: read-yaml
