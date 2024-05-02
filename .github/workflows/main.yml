@@ -32,9 +32,11 @@ jobs:
           echo destroy: ${{ steps.read_action_js.outputs['destroy'] }}
 
   teste:
-    - name: use-yaml-file
-    run: |
-      echo ${{ needs.read-yaml.outputs['destroy']}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: use-yaml-file
+        run: |
+          echo ${{ needs.read-yaml.outputs['destroy']}}
 
   # destroy:
   #   needs: read-yaml
