@@ -8,7 +8,7 @@ import logging
 area = "SOA"  # Region: South America
 embkPort = "SSZ"  # Port of Embarcation: Santos
 departureDateFrom = "01%2F01%2F2025"  # January 1, 2025
-departureDateTo = "31%2F01%2F2025"  # January 31, 2025
+departureDateTo = "31%2F03%2F2025"  # March 31, 2025
 passengers = "2%7C0%7C0%7C0"  # number of passengers: 2 passengers
 nights = "6%2C7"  # night numbers 6-7 nights
 
@@ -20,8 +20,8 @@ class ScrapingService:
     
     def scrape_website(self):
         self.driver.get(
-            "https://www.msccruzeiros.com.br/Search%20Result?area=SOA&embkPort=SSZ&departureDateFrom="
-            "01%2F01%2F2025&departureDateTo=31%2F01%2F2025&passengers=2%7C0%7C0%7C0&page=1&nights=6%2C7")
+            f"https://www.msccruzeiros.com.br/Search%20Result?area={area}&embkPort={embkPort}&departureDateFrom="
+            f"{departureDateFrom}&departureDateTo={departureDateTo}&passengers={passengers}&page=1&nights={nights}")
         try:
             WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.CLASS_NAME, "itinerary-card-detail__destination"))
