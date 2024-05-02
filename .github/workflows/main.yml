@@ -33,29 +33,31 @@ jobs:
         run: |
           echo namespace: ${{ steps.read_action_js.outputs['destroy'] }}
 
-  # destroy:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v2
+  destroy:
+    needs: read-yaml
+    runs-on: ubuntu-latest
+    if: ${{ needs.read-yaml.outputs['destroy'] == true }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-  #     - name: Configure AWS Credentials
-  #       uses: aws-actions/configure-aws-credentials@v1
-  #       with:
-  #         aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: ${{ env.REGION }}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.REGION }}
 
-  #     - name: Setup Terraform
-  #       uses: hashicorp/setup-terraform@v1
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
 
-  #     - name: Terraform Init
-  #       run: terraform init
-  #       working-directory: ./infra
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./infra
 
-  #     - name: Terraform Destroy
-  #       run: terraform destroy -auto-approve
-  #       working-directory: ./infra
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
+        working-directory: ./infra
 
   # build:
   #   runs-on: ubuntu-latest
