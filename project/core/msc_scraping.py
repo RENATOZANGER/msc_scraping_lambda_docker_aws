@@ -22,9 +22,10 @@ class MscScraping:
             results = scraping_service.scrape_website()
             self.logging.info("Get results")
             target_value = [results[result] for result in results if (float(result) < float(os.environ.get('TARGET_VALUE')))]
-            self.logging.info(target_value)
             if target_value:
                 message = json.dumps(target_value, indent=4, ensure_ascii=False)
                 self.sns_client.publish_message(os.environ.get('SNS_TOPIC_ARN'), message)
+            else:
+                self.logging.info("Value above expected")
         except Exception as e:
             self.logging.error(f"Error: {str(e)}")
