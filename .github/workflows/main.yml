@@ -31,7 +31,7 @@ jobs:
 
       - name: use-yaml-file
         run: |
-          echo namespace: ${{ steps.read_action_js.outputs['destroy'] }}
+          echo destroy: ${{ steps.read_action_js.outputs['destroy'] }}
 
   destroy:
     needs: read-yaml
