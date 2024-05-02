@@ -7,7 +7,7 @@ from adapters.sns_client import SNSClientAdapter
 
 REGION = os.environ.get('REGION')
 SNS_ARN = os.environ.get('SNS_TOPIC_ARN')
-TARGET_VALUE = "%.3f" % (float(os.environ.get('TARGET_VALUE')))
+TARGET_VALUE = float("%.3f" % (float(os.environ.get('TARGET_VALUE'))))
 
 
 class MscScraping:
