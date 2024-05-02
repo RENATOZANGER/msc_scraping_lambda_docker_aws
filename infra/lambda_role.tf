@@ -19,12 +19,24 @@ resource "aws_iam_role" "lambda_role" {
 data "aws_iam_policy_document" "lambda_policy" {
   statement {
     actions = [
-      "ecr:GetAuthorizationToken",
+      "ecr:GetAuthorizationToken"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
       "logs:CreateLogGroup",
+    ]
+    resources = ["arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:*"]
+  }
+
+  statement {
+    actions = [
       "logs:CreateLogStream",
       "logs:PutLogEvents"
     ]
-    resources = ["*"]
+    resources = ["arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${var.lambda_name}:*"]
   }
 
   statement {
