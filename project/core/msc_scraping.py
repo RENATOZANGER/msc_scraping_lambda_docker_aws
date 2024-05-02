@@ -24,6 +24,7 @@ class MscScraping:
             if target_value:
                 message = json.dumps(target_value, indent=4, ensure_ascii=False)
                 self.sns_client.publish_message(os.environ.get('SNS_TOPIC_ARN'), message)
+                self.logging.info("Email successfully sent")
             else:
                 self.logging.info("Value above expected")
         except Exception as e:
