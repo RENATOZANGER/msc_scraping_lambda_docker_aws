@@ -6,7 +6,7 @@ terraform {
   backend "s3" {
     bucket = "lambda-scraping-remote-state"
     key = "lambda-scraping/terraform.tfstate"
-    region = "us-east-1"
+    region = var.test_region
   }
 }
 
