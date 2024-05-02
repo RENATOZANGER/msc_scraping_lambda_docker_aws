@@ -21,7 +21,7 @@ class MscScraping:
             self.logging.info("Scraping MSC")
             results = scraping_service.scrape_website()
             self.logging.info("Get results")
-            target_value = [results[result] for result in results if (float(result) < 4.200)]
+            target_value = [results[result] for result in results if (float(result) < float(os.environ.get('TARGET_VALUE')))]
             self.logging.info(target_value)
             if target_value:
                 message = json.dumps(target_value, indent=4, ensure_ascii=False)

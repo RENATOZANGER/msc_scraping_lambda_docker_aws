@@ -33,5 +33,3 @@ variable "repo_name" {
   type        = string
   default     = "lambda_scraping"
 }
-
-variable "test_region" {}

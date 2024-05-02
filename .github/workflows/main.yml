@@ -124,10 +124,6 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
 
-    - name: Set output variable
-      id: my_variable
-      run: echo "::set-output name=my_variable::us-east-1"
-
     - name: Terraform Init
       run: terraform init
       working-directory: ./infra
