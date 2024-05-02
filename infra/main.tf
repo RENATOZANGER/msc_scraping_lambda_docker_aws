@@ -11,7 +11,7 @@ terraform {
 }
 
 resource "aws_lambda_function" "my_lambda" {
-  depends_on    = [ aws_sns_topic_subscription.email_subscription ]
+  depends_on    = [aws_sns_topic_subscription.email_subscription]
   function_name = var.lambda_name
   package_type  = "Image"
   image_uri     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com/${var.repo_name}:latest"
@@ -21,13 +21,13 @@ resource "aws_lambda_function" "my_lambda" {
   environment {
     variables = {
       SNS_TOPIC_ARN = aws_sns_topic.this.arn
-      TARGET_VALUE  = 4.200 
+      TARGET_VALUE  = 4.200
     }
   }
 }
 
 resource "aws_cloudwatch_log_group" "lambda_log_group" {
   name              = "/aws/lambda/${aws_lambda_function.my_lambda.function_name}"
-  retention_in_days = 1  
+  retention_in_days = 1
   depends_on        = [aws_lambda_function.my_lambda]
 }

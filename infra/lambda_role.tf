@@ -2,12 +2,12 @@ resource "aws_iam_role" "lambda_role" {
   name = var.role_name
 
   assume_role_policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
-        Action    = "sts:AssumeRole"
+        Action = "sts:AssumeRole"
         Principal = {
-          Service = ["lambda.amazonaws.com","scheduler.amazonaws.com"]
+          Service = ["lambda.amazonaws.com", "scheduler.amazonaws.com"]
         }
         Effect = "Allow"
         Sid    = ""
@@ -18,19 +18,19 @@ resource "aws_iam_role" "lambda_role" {
 
 data "aws_iam_policy_document" "ecr_policy" {
   statement {
-    actions   = [
+    actions = [
       "ecr:GetAuthorizationToken",
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
       "logs:PutLogEvents",
       "events:PutRule",
       "events:PutTargets"
-    ] 
+    ]
     resources = ["*"]
   }
 
   statement {
-    actions   = [
+    actions = [
       "ecr:BatchCheckLayerAvailability",
       "ecr:GetDownloadUrlForLayer",
       "ecr:BatchGetImage"
@@ -41,7 +41,7 @@ data "aws_iam_policy_document" "ecr_policy" {
   }
 
   statement {
-    actions   = [
+    actions = [
       "sns:Publish"
     ]
     resources = [
@@ -49,8 +49,8 @@ data "aws_iam_policy_document" "ecr_policy" {
     ]
   }
 
-    statement {
-    actions   = [
+  statement {
+    actions = [
       "lambda:InvokeFunction"
     ]
     resources = [
