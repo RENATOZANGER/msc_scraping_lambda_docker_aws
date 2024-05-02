@@ -19,6 +19,8 @@ on:
 jobs:
   read-yaml:
     runs-on: ubuntu-latest
+    outputs:
+      output1: ${{ steps.step1.outputs.destroy }}
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -28,8 +30,11 @@ jobs:
         with:
           config: ${{ github.workspace }}/destroy.yml
       - name: use-yaml-file
+        id: step1
         run: |
-          echo destroy: ${{ steps.read_action_js.outputs['destroy'] }}
+          #echo destroy: ${{ steps.read_action_js.outputs['destroy'] }}
+          echo "::set-output name=destroy::${{ steps.read_action_js.outputs['destroy'] }}"
+          #run: echo "::set-output name=some_output::value1"
 
   teste:
     needs: read-yaml
@@ -37,7 +42,7 @@ jobs:
     steps:
       - name: use-yaml-file
         run: |
-          echo ${{ steps.read_action_js.outputs['destroy'] }}
+          echo "Output from job1: ${{ needs.job1.outputs.output1 }}"
 
   # destroy:
   #   needs: read-yaml
