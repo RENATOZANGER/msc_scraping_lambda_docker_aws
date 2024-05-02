@@ -37,7 +37,7 @@ jobs:
   destroy:
     needs: read-yaml
     runs-on: ubuntu-latest
-    if: contains(${{ needs.read-yaml.outputs.output1 }}) == true
+    if: ${{ needs.read-yaml.outputs.output1 }} == false
     steps:
       - name: teste
         run: |
