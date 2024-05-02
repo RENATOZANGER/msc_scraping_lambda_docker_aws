@@ -34,19 +34,14 @@ jobs:
         run: |
           echo "::set-output name=destroy::${{ steps.read_action_js.outputs['destroy'] }}"
 
-  teste:
-    needs: read-yaml
-    runs-on: ubuntu-latest
-    steps:
-      - name: use-yaml-file
-        run: |
-          echo "Output from job1: ${{ needs.read-yaml.outputs.output1 }}"
-
   destroy:
     needs: read-yaml
-    if: ${{ needs.read-yaml.outputs.output1 }} == 'true'
     runs-on: ubuntu-latest
+    if: ${{ needs.read-yaml.outputs.output1 }} == 'true'
     steps:
+      - name: teste
+        run: |
+          echo "Output from job1: ${{ needs.read-yaml.outputs.output1 }}"
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -68,129 +63,129 @@ jobs:
         run: terraform destroy -auto-approve
         working-directory: ./infra
 
-  build:
-    runs-on: ubuntu-latest
-    needs: read-yaml
-    if: ${{ needs.read-yaml.outputs.output1 }} == 'false'
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+  # build:
+  #   runs-on: ubuntu-latest
+  #   needs: read-yaml
+  #   if: ${{ needs.read-yaml.outputs.output1 }} == 'false'
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v2
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.REGION }}
+  #   - name: Configure AWS Credentials
+  #     uses: aws-actions/configure-aws-credentials@v1
+  #     with:
+  #       aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+  #       aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+  #       aws-region: ${{ env.REGION }}
     
-    - name: Login to Amazon ECR
-      uses: aws-actions/amazon-ecr-login@v2
+  #   - name: Login to Amazon ECR
+  #     uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Check if ECR repository exists
-      id: check-ecr-repository
-      run: |
-        if aws ecr describe-repositories --repository-names ${{ env.NAME_REPO }} >/dev/null 2>&1; then
-          echo "::set-output name=repository_exists::true"
-        else
-          echo "::set-output name=repository_exists::false"
-        fi
+  #   - name: Check if ECR repository exists
+  #     id: check-ecr-repository
+  #     run: |
+  #       if aws ecr describe-repositories --repository-names ${{ env.NAME_REPO }} >/dev/null 2>&1; then
+  #         echo "::set-output name=repository_exists::true"
+  #       else
+  #         echo "::set-output name=repository_exists::false"
+  #       fi
 
-    - name: Create ECR Repository if not exists
-      if: steps.check-ecr-repository.outputs.repository_exists == 'false'
-      run: |
-        aws ecr create-repository --repository-name ${{ env.NAME_REPO }} --image-scanning-configuration scanOnPush=true --region ${{ env.REGION }}
+  #   - name: Create ECR Repository if not exists
+  #     if: steps.check-ecr-repository.outputs.repository_exists == 'false'
+  #     run: |
+  #       aws ecr create-repository --repository-name ${{ env.NAME_REPO }} --image-scanning-configuration scanOnPush=true --region ${{ env.REGION }}
     
-    - name: Build Docker image
-      run: |
-        docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.REGION }}.amazonaws.com/${{ env.NAME_REPO }}:latest .
+  #   - name: Build Docker image
+  #     run: |
+  #       docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.REGION }}.amazonaws.com/${{ env.NAME_REPO }}:latest .
 
-    - name: Push Docker image to ECR
-      run: |
-        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.REGION }}.amazonaws.com/${{ env.NAME_REPO }}:latest
+  #   - name: Push Docker image to ECR
+  #     run: |
+  #       docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.REGION }}.amazonaws.com/${{ env.NAME_REPO }}:latest
 
-    - name: Delete Untagged Images
-      run: |
-        # delete image without tag
-        images=$(aws ecr describe-images --repository-name "${{ env.NAME_REPO }}" --query 'imageDetails[?imageTags == `null`].imageDigest' --output text)
-        for image in $images; do
-            echo "delete image without tag: $image"
-            aws ecr batch-delete-image --repository-name "${{ env.NAME_REPO }}" --image-ids imageDigest="$image"
-        done
+  #   - name: Delete Untagged Images
+  #     run: |
+  #       # delete image without tag
+  #       images=$(aws ecr describe-images --repository-name "${{ env.NAME_REPO }}" --query 'imageDetails[?imageTags == `null`].imageDigest' --output text)
+  #       for image in $images; do
+  #           echo "delete image without tag: $image"
+  #           aws ecr batch-delete-image --repository-name "${{ env.NAME_REPO }}" --image-ids imageDigest="$image"
+  #       done
 
-    - name: Check if bucket exists
-      id: check_bucket
-      run: |
-        if aws s3api head-bucket --bucket ${{ env.NAME_BUCKET }} 2>/dev/null; then
-          echo "::set-output name=bucket_exists::true"
-        else
-          echo "::set-output name=bucket_exists::false"
-        fi
+  #   - name: Check if bucket exists
+  #     id: check_bucket
+  #     run: |
+  #       if aws s3api head-bucket --bucket ${{ env.NAME_BUCKET }} 2>/dev/null; then
+  #         echo "::set-output name=bucket_exists::true"
+  #       else
+  #         echo "::set-output name=bucket_exists::false"
+  #       fi
 
-    - name: Create bucket if not exists
-      if: steps.check_bucket.outputs.bucket_exists == 'false'
-      run: |
-        aws s3api create-bucket --bucket ${{ env.NAME_BUCKET }} --region ${{ env.REGION }}
-        aws s3api put-bucket-versioning --bucket ${{ env.NAME_BUCKET }} --versioning-configuration Status=Enabled
+  #   - name: Create bucket if not exists
+  #     if: steps.check_bucket.outputs.bucket_exists == 'false'
+  #     run: |
+  #       aws s3api create-bucket --bucket ${{ env.NAME_BUCKET }} --region ${{ env.REGION }}
+  #       aws s3api put-bucket-versioning --bucket ${{ env.NAME_BUCKET }} --versioning-configuration Status=Enabled
   
-  deploy:
-    needs: 
-      - build
-      - read-yaml
-    if: ${{ needs.read-yaml.outputs.output1 }} == 'false'
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v2
+  # deploy:
+  #   needs: 
+  #     - build
+  #     - read-yaml
+  #   if: ${{ needs.read-yaml.outputs.output1 }} == 'false'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Checkout Code
+  #     uses: actions/checkout@v2
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.REGION }}
+  #   - name: Configure AWS Credentials
+  #     uses: aws-actions/configure-aws-credentials@v1
+  #     with:
+  #       aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+  #       aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+  #       aws-region: ${{ env.REGION }}
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
+  #   - name: Setup Terraform
+  #     uses: hashicorp/setup-terraform@v1
 
-    - name: Terraform Init
-      run: terraform init
-      working-directory: ./infra
+  #   - name: Terraform Init
+  #     run: terraform init
+  #     working-directory: ./infra
 
-    - name: Terraform Validate
-      run: terraform validate
-      working-directory: ./infra
+  #   - name: Terraform Validate
+  #     run: terraform validate
+  #     working-directory: ./infra
 
-    - name: Terraform Apply
-      run: terraform apply -auto-approve
-      working-directory: ./infra
+  #   - name: Terraform Apply
+  #     run: terraform apply -auto-approve
+  #     working-directory: ./infra
 
-    - name: Check Deployment Status
-      run: terraform output deployment_status
-      id: deployment_status
+  #   - name: Check Deployment Status
+  #     run: terraform output deployment_status
+  #     id: deployment_status
 
-    - name: Rollback on Failure
-      if: ${{ steps.deployment_status.outputs.status != 'success' }}
-      run: terraform destroy -auto-approve
+  #   - name: Rollback on Failure
+  #     if: ${{ steps.deployment_status.outputs.status != 'success' }}
+  #     run: terraform destroy -auto-approve
 
-  update-lambda:
-    needs:
-      - deploy
-      - read-yaml
-    if: ${{ needs.read-yaml.outputs.output1 }} == 'false'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+  # update-lambda:
+  #   needs:
+  #     - deploy
+  #     - read-yaml
+  #   if: ${{ needs.read-yaml.outputs.output1 }} == 'false'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
     
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.REGION }}
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ${{ env.REGION }}
 
-      - name: Update Lambda function
-        run: |
-          aws lambda update-function-code \
-            --function-name ${{ env.NAME_LAMBDA }} \
-            --image-uri ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.REGION }}.amazonaws.com/${{ env.NAME_REPO }}:latest
+  #     - name: Update Lambda function
+  #       run: |
+  #         aws lambda update-function-code \
+  #           --function-name ${{ env.NAME_LAMBDA }} \
+  #           --image-uri ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.REGION }}.amazonaws.com/${{ env.NAME_REPO }}:latest
