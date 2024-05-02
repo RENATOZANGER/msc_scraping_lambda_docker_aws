@@ -23,7 +23,7 @@ jobs:
       - name: Ler o arquivo destroy.yml
         id: read_arquivo
         run: |
-          echo "::set-output name=destroy::$(cat destroy.yml | grep destroy | cut -d ' ' -f 2)"
+          echo "::set-output name=destroy::$(cat ./destroy.yml | grep destroy | cut -d ' ' -f 2)"
 
       - name: Exibir valor da variável
         run: echo "O valor da variável é ${{ steps.read_arquivo.outputs.minha_variavel }}"
