@@ -72,22 +72,41 @@ jobs:
       - name: Delete ECR Repository
         run: |
           aws ecr delete-repository --repository-name ${{ env.NAME_REPO }} --force --region ${{ env.REGION }}
-      - name: Disable bucket versioning
+      
+      - name: Delete all objects and versions from the bucket
         run: |
-          aws s3api put-bucket-versioning --bucket ${{ env.NAME_BUCKET }} --versioning-configuration Status=Suspended --region ${{ env.REGION }}
-      - name: Delete all objects from the bucket
-        run: |
+          # Delete all current objects
           aws s3 rm s3://${{ env.NAME_BUCKET }} --recursive --region ${{ env.REGION }}
-      - name: Delete all versions and delete markers
-        run: |
-          aws s3api list-object-versions --bucket ${{ env.NAME_BUCKET }} --output json --query '{Objects: Versions[].{Key:Key,VersionId:VersionId}}' | jq -c '.Objects[]' | while read -r obj; do
+        
+          # Handle versioned objects
+          aws s3api list-object-versions --bucket ${{ env.NAME_BUCKET }} --output json \
+            --query '{Objects: delete({Objects: Versions[].{Key:Key,VersionId:VersionId}} + delete({Objects: DeleteMarkers[].{Key:Key,VersionId:VersionId}}))}' | \
+          jq -c '.Objects[]' | while read -r obj; do
             KEY=$(echo $obj | jq -r .Key);
             VERSION_ID=$(echo $obj | jq -r .VersionId);
-            aws s3api delete-object --bucket ${{ env.NAME_BUCKET }} --key "$KEY" --version-id "$VERSION_ID";
+            aws s3api delete-object --bucket ${{ env.NAME_BUCKET }} --key "$KEY" --version-id "$VERSION_ID" --region ${{ env.REGION }};
           done
+        
       - name: Delete the bucket
         run: |
           aws s3api delete-bucket --bucket ${{ env.NAME_BUCKET }} --region ${{ env.REGION }}
+        
+      # - name: Disable bucket versioning
+      #   run: |
+      #     aws s3api put-bucket-versioning --bucket ${{ env.NAME_BUCKET }} --versioning-configuration Status=Suspended --region ${{ env.REGION }}
+      # - name: Delete all objects from the bucket
+      #   run: |
+      #     aws s3 rm s3://${{ env.NAME_BUCKET }} --recursive --region ${{ env.REGION }}
+      # - name: Delete all versions and delete markers
+      #   run: |
+      #     aws s3api list-object-versions --bucket ${{ env.NAME_BUCKET }} --output json --query '{Objects: Versions[].{Key:Key,VersionId:VersionId}}' | jq -c '.Objects[]' | while read -r obj; do
+      #       KEY=$(echo $obj | jq -r .Key);
+      #       VERSION_ID=$(echo $obj | jq -r .VersionId);
+      #       aws s3api delete-object --bucket ${{ env.NAME_BUCKET }} --key "$KEY" --version-id "$VERSION_ID";
+      #     done
+      # - name: Delete the bucket
+      #   run: |
+      #     aws s3api delete-bucket --bucket ${{ env.NAME_BUCKET }} --region ${{ env.REGION }}
         
         
         
