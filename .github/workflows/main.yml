@@ -42,7 +42,7 @@ jobs:
     steps:
       - name: use-yaml-file
         run: |
-          echo "Output from job1: ${{ needs.job1.outputs.output1 }}"
+          echo "Output from job1: ${{ needs.read-yaml.outputs.output1 }}"
 
   # destroy:
   #   needs: read-yaml
