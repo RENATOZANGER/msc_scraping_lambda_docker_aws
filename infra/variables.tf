@@ -10,16 +10,28 @@ variable "lambda_name" {
   default     = "Scraping-MSC"
 }
 
-variable "policy_name" {
-  description = "policy name"
+variable "policy_lambda_name" {
+  description = "policy lambda name"
   type        = string
-  default     = "ECRAccessPolicy"
+  default     = "policy_lambda_name"
 }
 
-variable "role_name" {
-  description = "role name"
+variable "policy_scheduler_name" {
+  description = "policy scheduler name"
+  type        = string
+  default     = "policy_scheduler_name"
+}
+
+variable "role_lambda_name" {
+  description = "role lambda name"
   type        = string
   default     = "lambda_role"
+}
+
+variable "role_scheduler_name" {
+  description = "role scheduler name"
+  type        = string
+  default     = "scheduler_role"
 }
 
 variable "bucket_name" {

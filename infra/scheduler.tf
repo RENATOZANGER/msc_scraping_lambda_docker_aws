@@ -11,6 +11,6 @@ resource "aws_scheduler_schedule" "scheduler_lambda" {
 
   target {
     arn      = aws_lambda_function.my_lambda.arn
-    role_arn = aws_iam_role.lambda_role.arn
+    role_arn = aws_iam_role.scheduler_role
   }
 }
