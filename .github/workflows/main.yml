@@ -37,7 +37,7 @@ jobs:
     steps:
       - name: use-yaml-file
         run: |
-          echo ${{ needs.read-yaml.outputs['destroy']}}
+          echo ${{ steps.read_action_js.outputs['destroy'] }}
 
   # destroy:
   #   needs: read-yaml
