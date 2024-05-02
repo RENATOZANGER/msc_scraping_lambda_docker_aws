@@ -7,7 +7,7 @@ from adapters.sns_client import SNSClientAdapter
 
 REGION = os.environ.get('REGION')
 SNS_ARN = os.environ.get('SNS_TOPIC_ARN')
-TARGET_VALUE = float("%.3f" % (float(os.environ.get('TARGET_VALUE'))))
+TARGET_VALUE = float(os.environ.get('TARGET_VALUE'))
 
 
 class MscScraping:
@@ -24,7 +24,6 @@ class MscScraping:
             self.logging.info("Scraping MSC")
             results = scraping_service.scrape_website()
             self.logging.info("Get results")
-            print(TARGET_VALUE, type(TARGET_VALUE))
             target_value = [results[result] for result in results if (float(result) < TARGET_VALUE)]
             if target_value:
                 message = json.dumps(target_value, indent=4, ensure_ascii=False)
