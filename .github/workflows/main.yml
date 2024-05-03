@@ -41,10 +41,6 @@ jobs:
     runs-on: ubuntu-latest
     if: needs.read-yaml.outputs.output1 == 'true'
     steps:
-      - name: teste
-        run: |
-          echo "Output from job1: ${{ needs.read-yaml.outputs.output1 }}"
-      
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -73,17 +69,7 @@ jobs:
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.REGION }}
       
-      - name: Check if ECR repository exists
-        id: check-ecr-repository
-        run: |
-          if aws ecr describe-repositories --repository-names ${{ env.NAME_REPO }} >/dev/null 2>&1; then
-            echo "::set-output name=repository_exists::true"
-          else
-            echo "::set-output name=repository_exists::false"
-          fi
-      
-      - name: Delete ECR Repository if exists
-        if: steps.check-ecr-repository.outputs.repository_exists == 'true'
+      - name: Delete ECR Repository
         run: |
           aws ecr delete-repository --repository-name ${{ env.NAME_REPO }} --force --region ${{ env.REGION }}
       
